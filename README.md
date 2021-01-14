@@ -1,2 +1,2 @@
 # Desarrollo continuo para seguir aprendiendo... 
-Django+Bootstrap+(CoreySchafer Snippets)+SWA S3
+Django+Bootstrap+(CoreySchafer Snippets)+AWS S3
