@@ -45,10 +45,8 @@ class TelcoSystem:
         if client_name not in self.invoices:
             self.invoices[client_name] = []
             self.invoices[client_name].append(InternationalCall.bill(start_date, end_date, client_name, int_cost))
-            self.invoices[client_name + ' bills'] = int_cost
         else:
             self.invoices[client_name].append(InternationalCall.bill(start_date, end_date, client_name, int_cost))
-            self.invoices[client_name + ' bills'] += int_cost
         #####################    
         self.all_billed += int_cost
         self.all_calls += 1
@@ -60,10 +58,8 @@ class TelcoSystem:
         if client_name not in self.invoices:
             self.invoices[client_name] = []
             self.invoices[client_name].append(NationalCall.bill(start_date, end_date, client_name, nat_cost))
-            self.invoices[client_name + ' bills'] = nat_cost
         else:
             self.invoices[client_name].append(NationalCall.bill(start_date, end_date, client_name, nat_cost))
-            self.invoices[client_name + ' bills'] += nat_cost
         #####################    
         self.all_billed += nat_cost
         self.all_calls += 1
@@ -85,10 +81,8 @@ class TelcoSystem:
         if client_name not in self.invoices:
             self.invoices[client_name] = []
             self.invoices[client_name].append(LocalCall.bill(start_date, end_date, client_name, local_cost))
-            self.invoices[client_name + ' bills'] = local_cost
         else:
             self.invoices[client_name].append(LocalCall.bill(start_date, end_date, client_name, local_cost))
-            self.invoices[client_name + ' bills'] += local_cost
         #####################    
         self.all_billed += local_cost
         self.all_calls += 1
@@ -103,7 +97,16 @@ class TelcoSystem:
         
 
     def total_billed_for(self, client_name):
-        print(self.invoices[client_name + ' bills'])
+        total = 0
+        s = ''
+        r = ''
+        t = ''
+        for i in range (0, len(self.invoices[client_name])):
+            s = self.invoices[client_name][i][4]
+            t, r = s.split()
+            total += float(t)
+
+        print(total)
 
 
     def number_of_calls_for(self, client_name):
