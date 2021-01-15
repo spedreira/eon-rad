@@ -1,18 +1,37 @@
 import datetime
 
-COST_INTERNATIONAL_CALL_MIN = 2
-COST_NATIONAL_CALL_MIN = 1.5
-COST_LOCAL_CALL_MIN = 0.50
-COST_LOCAL_CALL_MIN_PEAK = 1
 INVALID_HOUR = 25
+
+class InternationalCall():
+    call_cost_per_min = 2
+    
+    def bill(start_date, end_date, client_name, int_cost):
+        #Client Name, Class, Length, Cost
+        return (client_name, start_date.strftime('%m/%d/%Y'), 'International',str(((end_date - start_date).total_seconds())/60)+' minutes', str(int_cost)+' pesos')
+
+class NationalCall():
+    call_cost_per_min = 1.5
+
+    def bill(start_date, end_date, client_name, nat_cost):
+        #Client Name, Class, Length, Cost
+        return (client_name, start_date.strftime('%m/%d/%Y'), 'National',str(((end_date - start_date).total_seconds())/60)+' minutes', str(nat_cost)+' pesos')
+
+class LocalCall():
+    call_cost_per_min = 0.5
+    call_cost_per_min_peak_hour = 1
+
+    def bill(start_date, end_date, client_name, local_cost):
+        #Client Name, Class, Length, Cost
+        return (client_name, start_date.strftime('%m/%d/%Y'), 'Local',str(((end_date - start_date).total_seconds())/60)+' minutes', str(local_cost)+' pesos')
+
 
 class TelcoSystem:
     def __init__(self, peak_hour = INVALID_HOUR):
         
         self.peak_hour = peak_hour
         self.invoices = {}
-        self.invoices['all_billed'] = 0
-        self.invoices['all_calls'] = 0
+        self.all_billed = 0
+        self.all_calls = 0
 
 
     @staticmethod
@@ -21,69 +40,66 @@ class TelcoSystem:
 
 
     def register_international_call_between(self, start_date, end_date, client_name):
-        int_cost = ((end_date - start_date).total_seconds())/60 * COST_INTERNATIONAL_CALL_MIN
+        int_cost = ((end_date - start_date).total_seconds())/60 * InternationalCall.call_cost_per_min
+
         if client_name not in self.invoices:
             self.invoices[client_name] = []
-            self.invoices[client_name].append((client_name, start_date.strftime('%m/%d/%Y'), 'International',str(((end_date - start_date).total_seconds())/60)+' minutes', str(int_cost)+' pesos'))
+            self.invoices[client_name].append(InternationalCall.bill(start_date, end_date, client_name, int_cost))
             self.invoices[client_name + ' bills'] = int_cost
-            self.invoices[client_name + ' calls'] = 1
         else:
-            self.invoices[client_name].append((client_name, start_date.strftime('%m/%d/%Y'), 'International',str(((end_date - start_date).total_seconds())/60)+' minutes', str(int_cost)+' pesos'))
+            self.invoices[client_name].append(InternationalCall.bill(start_date, end_date, client_name, int_cost))
             self.invoices[client_name + ' bills'] += int_cost
-            self.invoices[client_name + ' calls'] += 1
         #####################    
-        self.invoices['all_billed'] += int_cost
-        self.invoices['all_calls'] += 1
+        self.all_billed += int_cost
+        self.all_calls += 1
 
 
     def register_national_call_between(self, start_date, end_date, client_name):
-        nat_cost = ((end_date - start_date).total_seconds())/60 * COST_NATIONAL_CALL_MIN
+        nat_cost = ((end_date - start_date).total_seconds())/60 * NationalCall.call_cost_per_min
+
         if client_name not in self.invoices:
             self.invoices[client_name] = []
-            self.invoices[client_name].append((client_name, start_date.strftime('%m/%d/%Y'), 'National',str(((end_date - start_date).total_seconds())/60)+' minutes', str(nat_cost)+' pesos'))
+            self.invoices[client_name].append(NationalCall.bill(start_date, end_date, client_name, nat_cost))
             self.invoices[client_name + ' bills'] = nat_cost
-            self.invoices[client_name + ' calls'] = 1
         else:
-            self.invoices[client_name].append((client_name, start_date.strftime('%m/%d/%Y'), 'National',str(((end_date - start_date).total_seconds())/60)+' minutes', str(nat_cost)+' pesos'))
+            self.invoices[client_name].append(NationalCall.bill(start_date, end_date, client_name, nat_cost))
             self.invoices[client_name + ' bills'] += nat_cost
-            self.invoices[client_name + ' calls'] += 1
         #####################    
-        self.invoices['all_billed'] += nat_cost
-        self.invoices['all_calls'] += 1
+        self.all_billed += nat_cost
+        self.all_calls += 1
 
 
     def register_local_call_between(self, start_date, end_date, client_name):
         peak_minutes = 0
         minutes = 0
         date = start_date
-        while (date < end_date):
+        while (date < end_date): #minutes in a peak hour
             if (date.hour == self.peak_hour):
                 peak_minutes += 1
                 date = date + datetime.timedelta(minutes=1)
             else:
                 date = date + datetime.timedelta(minutes=1)
                 minutes += 1
-        local_cost = minutes*COST_LOCAL_CALL_MIN + peak_minutes*COST_LOCAL_CALL_MIN_PEAK
+        local_cost = minutes*LocalCall.call_cost_per_min + peak_minutes*LocalCall.call_cost_per_min_peak_hour
+
         if client_name not in self.invoices:
             self.invoices[client_name] = []
-            self.invoices[client_name].append((client_name, start_date.strftime('%m/%d/%Y'), 'Local',str(((end_date - start_date).total_seconds())/60)+' minutes', str(local_cost)+' pesos'))
+            self.invoices[client_name].append(LocalCall.bill(start_date, end_date, client_name, local_cost))
             self.invoices[client_name + ' bills'] = local_cost
-            self.invoices[client_name + ' calls'] = 1
         else:
-            self.invoices[client_name].append((client_name, start_date.strftime('%m/%d/%Y'), 'Local',str(((end_date - start_date).total_seconds())/60)+' minutes', str(local_cost)+' pesos'))
+            self.invoices[client_name].append(LocalCall.bill(start_date, end_date, client_name, local_cost))
             self.invoices[client_name + ' bills'] += local_cost
-            self.invoices[client_name + ' calls'] += 1
         #####################    
-        self.invoices['all_billed'] += local_cost
-        self.invoices['all_calls'] += 1
+        self.all_billed += local_cost
+        self.all_calls += 1
 
 
     def historical_total_billed(self):
-        print(self.invoices['all_billed'])
+        print(self.all_billed)
 
     
     def historical_number_of_calls(self):
-        print(self.invoices['all_calls'])
+        print(self.all_calls)
         
 
     def total_billed_for(self, client_name):
@@ -91,7 +107,7 @@ class TelcoSystem:
 
 
     def number_of_calls_for(self, client_name):
-        print(self.invoices[client_name + ' calls'])
+        print(len(self.invoices[client_name]))
 
     def invoices_of (self, client_name):
         print(self.invoices[client_name])
